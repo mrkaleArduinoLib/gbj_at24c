@@ -1,0 +1,12 @@
+{
+  "name": "gbjAT24C",
+  "keywords": "eeprom, atmel, twowire, 2-wire, i2c, iic, bus",
+  "description": "Library for Atmel AT24Cxxx EEPROM chips communicating on two-wire (I2C) bus.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrkaleArduinoLib/gbj_at24c.git"
+  },
+  "version": "1.0.0",
+  "frameworks": "arduino",
+  "platforms": ["atmelavr", "atmelsam", "espressif8266", "espressif32"]
+}
