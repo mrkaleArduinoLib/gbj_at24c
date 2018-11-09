@@ -16,77 +16,74 @@
   CREDENTIALS:
   Author: Libor Gabaj
 */
-#define SKETCH "GBJ_TMP102_MEASURE 1.0.0"
+#define SKETCH "GBJ_AT24C_DEMO 1.0.0"
 
-#include "gbj_tmp102.h"
+#include "gbj_at24c.h"
 
 const unsigned int PERIOD_MEASURE = 3000;  // Time in miliseconds between measurements
+const unsigned int POSITION = 0x05;
 
 // Software configuration
-gbj_tmp102 Sensor = gbj_tmp102();
-// gbj_tmp102 Sensor = gbj_tmp102(gbj_tmp102::CLOCK_100KHZ, true, D2, D1);
-// gbj_tmp102 Sensor = gbj_tmp102(gbj_tmp102::CLOCK_400KHZ);
+gbj_at24c Eeprom = gbj_at24c();
+// gbj_at24c Eeprom = gbj_at24c(gbj_at24c::CLOCK_100KHZ, true, D2, D1);
+// gbj_at24c Eeprom = gbj_at24c(gbj_at24c::CLOCK_400KHZ);
 float tempValue;
 
 
 void errorHandler(String location)
 {
-  if (Sensor.isSuccess()) return;
+  if (Eeprom.isSuccess()) return;
   Serial.print(location);
   Serial.print(" - Error: ");
-  Serial.print(Sensor.getLastResult());
+  Serial.print(Eeprom.getLastResult());
   Serial.print(" - ");
-  switch (Sensor.getLastResult())
+  switch (Eeprom.getLastResult())
   {
     // General
-    case gbj_tmp102::ERROR_ADDRESS:
+    case gbj_at24c::ERROR_ADDRESS:
       Serial.println("ERROR_ADDRESS");
       break;
 
-    case gbj_tmp102::ERROR_PINS:
+    case gbj_at24c::ERROR_PINS:
       Serial.println("ERROR_PINS");
       break;
 
     // Arduino, Esspressif specific
 #if defined(__AVR__) || defined(ESP8266) || defined(ESP32)
-    case gbj_tmp102::ERROR_BUFFER:
+    case gbj_at24c::ERROR_BUFFER:
       Serial.println("ERROR_BUFFER");
       break;
 
-    case gbj_tmp102::ERROR_NACK_DATA:
+    case gbj_at24c::ERROR_NACK_DATA:
       Serial.println("ERROR_PINS");
       break;
 
-    case gbj_tmp102::ERROR_NACK_OTHER:
+    case gbj_at24c::ERROR_NACK_OTHER:
       Serial.println("ERROR_NACK_OTHER");
       break;
 
     // Particle specific
 #elif defined(PARTICLE)
-    case gbj_tmp102::ERROR_BUSY:
+    case gbj_at24c::ERROR_BUSY:
       Serial.println("ERROR_BUSY");
       break;
 
-    case gbj_tmp102::ERROR_END:
+    case gbj_at24c::ERROR_END:
       Serial.println("ERROR_END");
       break;
 
-    case gbj_tmp102::ERROR_TRANSFER:
+    case gbj_at24c::ERROR_TRANSFER:
       Serial.println("ERROR_TRANSFER");
       break;
 
-    case gbj_tmp102::ERROR_TIMEOUT:
+    case gbj_at24c::ERROR_TIMEOUT:
       Serial.println("ERROR_TIMEOUT");
       break;
 #endif
 
-    // Sensor specific
-    case gbj_tmp102::ERROR_MEASURE_TEMP:
-      Serial.println("ERROR_MEASURE_TEMP");
-      break;
-
-    case gbj_tmp102::ERROR_SETUP_TEMP:
-      Serial.println("ERROR_SETUP_TEMP");
+    // Eeprom specific
+    case gbj_at24c::ERROR_POSITION:
+      Serial.println("ERROR_POSITION");
       break;
 
     default:
@@ -102,35 +99,53 @@ void setup()
   Serial.println(SKETCH);
   Serial.println("Libraries:");
   Serial.println(gbj_twowire::VERSION);
-  Serial.println(gbj_tmp102::VERSION);
+  Serial.println(gbj_at24c::VERSION);
   Serial.println("---");
 
   // Initialize sensor
-  if (Sensor.begin()) // Use default address
+  if (Eeprom.begin(gbj_at24c::AT24C256)) // Use default address
   {
     errorHandler("Begin");
     return;
   }
+  Serial.println("Type = AT24C" + String(Eeprom.getCapacityKiBit()));
+  Serial.println("Capacity = " + String(Eeprom.getCapacityKiBit()) + " Kib (" + String(Eeprom.getCapacityBit()) + " b)");
+  Serial.println("Capacity = " + String(Eeprom.getCapacityKiByte()) + " KiB (" + String(Eeprom.getCapacityByte()) + " B)");
+  Serial.println("---");
 
-  // Print header
-  Serial.println("Temperature ('C')");
+  // Read position 0
+  uint8_t val;
+  // Serial.println("BEFORE");
+  // val = Eeprom.retrieve(POSITION);
+  // if (Eeprom.isError())
+  // {
+  //   errorHandler("Read");
+  //   return;
+  // }
+  // Serial.println(val);
+  // Serial.println(val, HEX);
+  // Serial.println(val, BIN);
+
+  // Write position 0
+  if (Eeprom.store(POSITION, 0xFC))
+  {
+    errorHandler("Write");
+    return;
+  }
+
+  // Read position 0
+  Serial.println("AFTER");
+  val = Eeprom.retrieve(POSITION);
+  if (Eeprom.isError())
+  {
+    errorHandler("Read");
+    return;
+  }
+  Serial.println(val);
+  Serial.println(val, HEX);
+  Serial.println(val, BIN);
+
 }
 
 
-void loop()
-{
-  if (Sensor.isError()) return;
-
-  // Measure
-  tempValue = Sensor.measureTemperature();
-  // tempValue = Sensor.measureTemperatureOneshot();
-  if (Sensor.isSuccess())
-  {
-    Serial.println(tempValue, 4);
-  }
-  else
-  {
-    errorHandler("Temperature");
-  }
-  delay(PERIOD_MEASURE);
-}
+void loop() {}

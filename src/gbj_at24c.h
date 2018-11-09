@@ -70,14 +70,14 @@ gbj_at24c(uint32_t clockSpeed = CLOCK_100KHZ, bool busStop = true, \
   which determines the operation modus of the chip.
 
   PARAMETERS:
-  capacity - Capacity bit order of the chip type. The binary value just with
-             capacity bit set determines the memory capacity in kibibits
-             (multiples of 1024). The library supports EEPROM chips with
-             capacities from 1 to 512 Kib. The parameter is constraint to the
-             expected range.
-            - Data type: non-negative integer
-            - Default value: none
-            - Limited range: ADDRESS_MIN ~ AT24C512 or 0 ~ 9
+  type - EEPROM chip typ determining a capacity bit order. The binary value just
+         with capacity bit set determines the memory capacity in kibibits
+         (multiples of 1024). The library supports EEPROM chips with
+         capacities from 1 to 512 Kib. The parameter is constraint to the
+         expected range.
+         - Data type: non-negative integer
+         - Default value: none
+         - Limited range: ADDRESS_MIN ~ AT24C512 or 0 ~ 9
 
   address - One of 8 possible 7 bit addresses of the chip or address offset
             determined by the connection of address pins.
@@ -92,13 +92,29 @@ gbj_at24c(uint32_t clockSpeed = CLOCK_100KHZ, bool busStop = true, \
   RETURN:
   Result code.
 */
-uint8_t begin(uint8_t capacity, uint8_t address = 0);
+uint8_t begin(uint8_t type, uint8_t address = 0);
 
 template<class T>
-T retrieve(T *position);
+T retrieve(uint16_t position)
+{
+  uint8_t bytes = sizeof(T);
+  T data;
+  if (busSendStream((uint8_t*)&position, sizeof(position), true)) return getLastResult();
+  if (busReceive((uint8_t*)&data, bytes)) return getLastResult();
+  return data;
+}
 
 template<class T>
-uint8_t store(T *position, T data);
+uint8_t store(uint16_t position, T data)
+{
+  uint8_t buffer[2 + sizeof(T)];
+  buffer[0] = position >> 8;  // MSB
+  buffer[1] = position & 0xFF;  // LSB
+  uint8_t bytes = sizeof(T);
+  uint8_t *ptr = (uint8_t *)(void *)&data;
+  while (bytes--) buffer[2 + bytes] = *(ptr + bytes);
+  return busSendStream(buffer, sizeof(buffer) / sizeof(buffer[0]));
+}
 
 
 //------------------------------------------------------------------------------
@@ -109,14 +125,21 @@ uint8_t store(T *position, T data);
 //------------------------------------------------------------------------------
 // Public getters
 //------------------------------------------------------------------------------
-inline uint32_t getCapacityBits() { return 1 << (_status.configRegister + 10); };
-inline uint32_t getCapacity() { return 1 << (_status.configRegister + 7); };  // In bytes
+inline uint8_t getType() { return _status.capacityBit; };
+inline uint16_t getCapacityKiBit() { return 1 << _status.capacityBit; }; // In Kibits
+inline uint32_t getCapacityBit() { return (uint32_t) getCapacityKiBit() << 10; }; // In bits
+inline uint8_t getCapacityKiByte() { return getCapacityKiBit() >> 3; };  // In Kibibytes
+inline uint16_t getCapacityByte() { return getCapacityKiBit() << 7; };  // In bytes
 
 
 private:
 //------------------------------------------------------------------------------
 // Private constants
 //------------------------------------------------------------------------------
+enum Params
+{
+  SEND_DELAY = 10,    // Sending page delay in milliseconds
+};
 
 //------------------------------------------------------------------------------
 // Private attributes
