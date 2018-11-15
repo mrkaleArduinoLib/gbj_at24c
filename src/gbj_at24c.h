@@ -47,7 +47,8 @@ enum Capacities  // Index bit in value, kilobits in name
 };
 enum ErrorCodes
 {
-  ERROR_POSITION = 255,  // Wrong position in EEPROM
+  ERROR_POSITION = 255,  // Wrong position in EEPROM; either 0 or no sufficient
+                         // space for data storing or retrieving
 };
 
 
@@ -94,32 +95,31 @@ gbj_at24c(uint32_t clockSpeed = CLOCK_100KHZ, bool busStop = true, \
 */
 uint8_t begin(uint8_t type, uint8_t address = 0);
 
-template<class T>
-T retrieve(uint16_t position)
-{
-  uint8_t bytes = sizeof(T);
-  T data;
-  if (busSendStream((uint8_t*)&position, sizeof(position), true)) return getLastResult();
-  if (busReceive((uint8_t*)&data, bytes)) return getLastResult();
-  return data;
-}
+
+uint8_t storeStream(uint16_t position, uint8_t *dataBuffer, uint16_t dataLen);
+uint8_t retrieveStream(uint16_t position, uint8_t *dataBuffer, uint16_t dataLen);
+uint8_t fill(uint16_t position, uint16_t dataLen, uint8_t fillValue);
+uint8_t erase();
+
 
 template<class T>
 uint8_t store(uint16_t position, T data)
 {
-  uint8_t buffer[2 + sizeof(T)];
-  buffer[0] = position >> 8;  // MSB
-  buffer[1] = position & 0xFF;  // LSB
-  uint8_t bytes = sizeof(T);
-  uint8_t *ptr = (uint8_t *)(void *)&data;
-  while (bytes--) buffer[2 + bytes] = *(ptr + bytes);
-  return busSendStream(buffer, sizeof(buffer) / sizeof(buffer[0]));
+  return storeStream(position, (uint8_t *)(void *)&data, sizeof(T));
+}
+
+
+template<class T>
+uint8_t retrieve(uint16_t position, T *dataBuffer)
+{
+  return retrieveStream(position, (uint8_t *)dataBuffer, sizeof(T));
 }
 
 
 //------------------------------------------------------------------------------
 // Public setters - they usually return result code.
 //------------------------------------------------------------------------------
+inline void setPageSize(uint8_t pageSize) { _status.pageSize = pageSize; };
 
 
 //------------------------------------------------------------------------------
@@ -130,6 +130,8 @@ inline uint16_t getCapacityKiBit() { return 1 << _status.capacityBit; }; // In K
 inline uint32_t getCapacityBit() { return (uint32_t) getCapacityKiBit() << 10; }; // In bits
 inline uint8_t getCapacityKiByte() { return getCapacityKiBit() >> 3; };  // In Kibibytes
 inline uint16_t getCapacityByte() { return getCapacityKiBit() << 7; };  // In bytes
+inline uint8_t getPageSize() { return _status.pageSize; };  // In bytes
+inline uint16_t getPages() { return getCapacityByte() / getPageSize(); };
 
 
 private:
@@ -138,7 +140,15 @@ private:
 //------------------------------------------------------------------------------
 enum Params
 {
-  SEND_DELAY = 10,    // Sending page delay in milliseconds
+  // Writing to the memory delays
+  SEND_DELAY_AT24C01_16 = 5,
+  SEND_DELAY_AT24C32_512 = 10,
+  // Memory page sizes
+  PAGESIZE_AT24C01_02 = 8,
+  PAGESIZE_AT24C04_16 = 16,
+  PAGESIZE_AT24C32_64 = 32,
+  PAGESIZE_AT24C128_256 = 64,
+  PAGESIZE_AT24C512 = 128,
 };
 
 //------------------------------------------------------------------------------
@@ -147,6 +157,7 @@ enum Params
 struct
 {
   uint8_t capacityBit;  // Order number of the capacity bit counting from 0
+  uint8_t pageSize;  // Size of the memory page in bytes
 } _status;
 
 
@@ -154,6 +165,7 @@ struct
 // Private methods - they return result code if not stated else
 //------------------------------------------------------------------------------
 uint8_t setAddress(uint8_t address);
+uint8_t checkPosition(uint16_t position, uint16_t dataLen);
 
 };
 
