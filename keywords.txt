@@ -11,7 +11,20 @@ gbj_at24c	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 begin	KEYWORD2
-reset	KEYWORD2
+storeStream	KEYWORD2
+retrieveStream	KEYWORD2
+fill	KEYWORD2
+erase	KEYWORD2
+store	KEYWORD2
+retrieve	KEYWORD2
+setPageSize	KEYWORD2
+getPageSize	KEYWORD2
+getPages	KEYWORD2
+getType	KEYWORD2
+getCapacityKiBit	KEYWORD2
+getCapacityBit	KEYWORD2
+getCapacityKiByte	KEYWORD2
+getCapacityByte	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

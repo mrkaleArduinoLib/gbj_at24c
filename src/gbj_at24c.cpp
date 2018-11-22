@@ -88,9 +88,12 @@ uint8_t gbj_at24c::retrieveStream(uint16_t position, uint8_t *dataBuffer, uint16
 
 uint8_t gbj_at24c::fill(uint16_t position, uint16_t dataLen, uint8_t fillValue)
 {
+  // Sanitize
+  dataLen = min(dataLen, getCapacityByte() - position);
+  if (checkPosition(position, dataLen)) return getLastResult();
+  // Store
   uint8_t dataBuffer[dataLen];
   for (uint8_t i = 0; i < dataLen; i++) dataBuffer[i] = fillValue;
-  if (checkPosition(position, dataLen)) return getLastResult();
   if(storeStream(position, dataBuffer, dataLen)) return getLastResult();
   return getLastResult();
 }

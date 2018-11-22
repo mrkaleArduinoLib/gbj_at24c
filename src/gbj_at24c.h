@@ -32,7 +32,7 @@ enum Addresses
   ADDRESS_MIN = 0x50,  // Minimal address (all address pins grounded)
   ADDRESS_MAX = 0x57,  // Maximal address (all address pins at Vcc)
 };
-enum Capacities  // Index bit in value, kilobits in name
+enum Capacities  // Index bit in value, kibibits in name
 {
   AT24C01 = 0,
   AT24C02 = 1,
@@ -96,12 +96,137 @@ gbj_at24c(uint32_t clockSpeed = CLOCK_100KHZ, bool busStop = true, \
 uint8_t begin(uint8_t type, uint8_t address = 0);
 
 
+/*
+  Store byte stream to the EEPROM.
+
+  DESCRIPTION:
+  The method writes input data byte stream to the memory chunked memory pages
+  if needed.
+  - If length of the stored byte stream spans over memory pages, the method
+    executes more communication transactions, each for corresponding page.
+
+  PARAMETERS:
+  position - Memory position where the storing should start.
+             - Data type: non-negative integer
+             - Default value: none
+             - Limited range: 0 ~ getCapacityByte() - 1
+
+  dataBuffer - Pointer to the byte data buffer.
+               - Data type: non-negative integer
+               - Default value: none
+               - Limited range: address space
+
+  dataLen - Number of bytes to be stored in memory.
+            - Data type: non-negative integer
+            - Default value: none
+            - Limited range: 0 ~ 65535
+
+  RETURN:
+  Result code.
+*/
 uint8_t storeStream(uint16_t position, uint8_t *dataBuffer, uint16_t dataLen);
+
+
+/*
+  Retrieve byte stream from the EEPROM.
+
+  DESCRIPTION:
+  The method reads data from memory and places it to the provided data buffer.
+  The buffer should be defined outside the library (in a sketch) with sufficient
+  length for desired data.
+
+  PARAMETERS:
+  position - Memory position where the retrieving should start.
+             - Data type: non-negative integer
+             - Default value: none
+             - Limited range: 0 ~ getCapacityByte() - 1
+
+  dataBuffer - Pointer to the byte data buffer for placing read data.
+               - Data type: non-negative integer
+               - Default value: none
+               - Limited range: address space
+
+  dataLen - Number of bytes to be retrieved from memory.
+            - Data type: non-negative integer
+            - Default value: none
+            - Limited range: 0 ~ 65535
+
+  RETURN:
+  Result code.
+*/
 uint8_t retrieveStream(uint16_t position, uint8_t *dataBuffer, uint16_t dataLen);
+
+
+/*
+  Fill consecutive positions in the EEPROM with a value.
+
+  DESCRIPTION:
+  The method writes input byte to defined positions in the memory.
+
+  PARAMETERS:
+  position - Memory position where the filling should start.
+             - Data type: non-negative integer
+             - Default value: none
+             - Limited range: 0 ~ getCapacityByte() - 1
+
+  dataLen - Number of positions to be filled in memory.
+            - Data type: non-negative integer
+            - Default value: none
+            - Limited range: 0 ~ 65535
+
+  fillValue - Byte value that should be write to all defined positions in memory.
+               - Data type: non-negative integer
+               - Default value: none
+               - Limited range: 0 ~ 255
+
+  RETURN:
+  Result code.
+*/
 uint8_t fill(uint16_t position, uint16_t dataLen, uint8_t fillValue);
+
+
+/*
+  Erase entire EEPROM.
+
+  DESCRIPTION:
+  The method writes byte value 0xFF (all binary 1s) to whole memory.
+  - The methods utilizes the method fill() from 0 position with entire byte
+    capacity of a memory chip with byte value 0xFF while it writes memory page
+    by page.
+
+  PARAMETERS:
+  None
+
+  RETURN:
+  Result code.
+*/
 uint8_t erase();
 
 
+/*
+  Store a value to the EEPROM.
+
+  DESCRIPTION:
+  The method writes a value of particular data type, generic or custom, to the memory.
+  - The method is templated utilizing method storeStream(), so that it determines
+    data byte stream length automatically.
+  - The method does not need to be called by templating syntax, because it is able
+    to identify proper data type by data type of the stored data value parameter.
+
+  PARAMETERS:
+  position - Memory position where the value storing should start.
+             - Data type: non-negative integer
+             - Default value: none
+             - Limited range: 0 ~ getCapacityByte() - 1
+
+  data - Value of particular data type that should be stored in the memory.
+         - Data type: dynamic
+         - Default value: none
+         - Limited range: 0 ~ getCapacityByte()
+
+  RETURN:
+  Result code.
+*/
 template<class T>
 uint8_t store(uint16_t position, T data)
 {
@@ -109,6 +234,33 @@ uint8_t store(uint16_t position, T data)
 }
 
 
+/*
+  Retrive a value from the EEPROM.
+
+  DESCRIPTION:
+  The method reads a value of particular data type, generic or custom, from the
+  memory to an external buffer with itmes of desired data type.
+  - The method is templated utilizing method retrieveStream(), so that it
+    determines data byte stream length automatically.
+  - The method does not need to be called by templating syntax, because it is able
+    to identify proper data type by data type of buffer pointer.
+  - An external buffer pointer is usually a pointer to a variable of corresponding
+    data type.
+
+  PARAMETERS:
+  position - Memory position where the value retrieving should start.
+             - Data type: non-negative integer
+             - Default value: none
+             - Limited range: 0 ~ getCapacityByte() - 1
+
+  dataBuffer - Pointer to a data buffer for placing read data of desired type.
+               - Data type: dynamic
+               - Default value: none
+               - Limited range: address space
+
+  RETURN:
+  Result code.
+*/
 template<class T>
 uint8_t retrieve(uint16_t position, T *dataBuffer)
 {
