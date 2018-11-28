@@ -56,7 +56,8 @@ uint8_t gbj_at24c::begin(uint8_t type, uint8_t address)
 uint8_t gbj_at24c::checkPosition(uint16_t position, uint16_t dataLen)
 {
   initLastResult();
-  if (dataLen == 0 || (getCapacityByte() - position) < dataLen) return setLastResult(ERROR_POSITION);
+  if (dataLen == 0 || getCapacityByte() < (position + dataLen)) \
+    return setLastResult(ERROR_POSITION);
   return getLastResult();
 }
 
@@ -109,6 +110,36 @@ uint8_t gbj_at24c::erase()
     position += getPageSize();
   }
   return getLastResult();
+}
+
+
+uint8_t gbj_at24c::detectSize(uint8_t &type)
+{
+  const uint16_t refPosition = 0;
+  const uint8_t refValue = 0x55;
+  const uint8_t testValue = 0xAA;
+  const uint8_t badType = 0xFF;
+  type = badType;
+  for (uint8_t capacityBit = AT24C512; capacityBit; capacityBit--)
+  {
+    // Write reference value to the very first position
+    if (store(refPosition, refValue)) return getLastResult();
+    // Write test value to the very last position of testing capacity.
+    // Do not use standard method in order to avoid capacity check.
+    uint16_t testPosition = (1 << (capacityBit + 6));
+    if (busSendStreamPrefixed((uint8_t *)(void *)&testValue, sizeof(testValue), false, \
+      (uint8_t *)&testPosition, sizeof(testPosition), true, true)) return getLastResult();
+    // Read reference position and compare it to the reference value.
+    // At wrong capacity the storing rollovers.
+    uint8_t readValue;
+    if (retrieve(refPosition, readValue)) return getLastResult();
+    if (readValue == refValue)
+    {
+      type = capacityBit;
+      return getLastResult();
+    }
+  }
+  return setLastResult(ERROR_POSITION);
 }
 
 

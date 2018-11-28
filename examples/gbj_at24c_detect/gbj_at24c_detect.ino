@@ -1,13 +1,11 @@
 /*
   NAME:
-  Using TMP102 sensor for basic temperature measurement.
+  Detect type of an EEPROM chip.
 
   DESCRIPTION:
-  The sketch measures temperature with TMP102 sensor.
-  - Connect sensor's pins to microcontroller's I2C bus as described in README.md
+  The sketch detects the type of EEPROM and displays all its capacity parameters.
+  - Connect chip's pins to microcontroller's I2C bus as described in README.md
     for used platform accordingly.
-  - Connect ADD0 pin to ground in order to use default I2C address. For other
-    connection determine the appropriate address in the begin() method calling.
 
   LICENSE:
   This program is free software; you can redistribute it and/or modify
@@ -16,19 +14,16 @@
   CREDENTIALS:
   Author: Libor Gabaj
 */
-#define SKETCH "GBJ_AT24C_DEMO 1.0.0"
+#define SKETCH "GBJ_AT24C_DETECT 1.0.0"
 
 #include "gbj_at24c.h"
-
-const unsigned int PERIOD_MEASURE = 3000;  // Time in miliseconds between measurements
-const unsigned int POSITION = 0x05;
 
 // Software configuration
 gbj_at24c Eeprom = gbj_at24c();
 // gbj_at24c Eeprom = gbj_at24c(gbj_at24c::CLOCK_100KHZ, true, D2, D1);
 // gbj_at24c Eeprom = gbj_at24c(gbj_at24c::CLOCK_400KHZ);
-float tempValue;
 
+unsigned char eepromType;
 
 void errorHandler(String location)
 {
@@ -102,49 +97,36 @@ void setup()
   Serial.println(gbj_at24c::VERSION);
   Serial.println("---");
 
-  // Initialize sensor
-  if (Eeprom.begin(gbj_at24c::AT24C256)) // Use default address
+  // Initialize EEPROM for the highest supported capacity in order to setup
+  // sufficient send delay.
+  // Adjust the type and address to your chip and address configuration.
+  if (Eeprom.begin(gbj_at24c::AT24C256))
+  if (Eeprom.begin(gbj_at24c::AT24C512)) // Use default address
+  {
+    errorHandler("Begin dummy");
+    return;
+  }
+  // Detect EEPROM type
+  if (Eeprom.detectSize(eepromType))
+  {
+    errorHandler("Detect");
+    return;
+  }
+  // Initialize detected EEPROM for default address.
+  // Adjust the address to your address configuration.
+  if (Eeprom.begin(eepromType)) // Use default address
   {
     errorHandler("Begin");
     return;
   }
+  // Dislay EEPROM parameters
   Serial.println("Type = AT24C" + String(Eeprom.getCapacityKiBit()));
   Serial.println("Capacity = " + String(Eeprom.getCapacityKiBit()) + " Kib (" + String(Eeprom.getCapacityBit()) + " b)");
   Serial.println("Capacity = " + String(Eeprom.getCapacityKiByte()) + " KiB (" + String(Eeprom.getCapacityByte()) + " B)");
+  Serial.println("Page = " + String(Eeprom.getPageSize()) + " B");
+  Serial.println("Pages = " + String(Eeprom.getPages()));
   Serial.println("---");
-
-  // Read position 0
-  uint8_t val;
-  // Serial.println("BEFORE");
-  // val = Eeprom.retrieve(POSITION);
-  // if (Eeprom.isError())
-  // {
-  //   errorHandler("Read");
-  //   return;
-  // }
-  // Serial.println(val);
-  // Serial.println(val, HEX);
-  // Serial.println(val, BIN);
-
-  // Write position 0
-  if (Eeprom.store(POSITION, 0xFC))
-  {
-    errorHandler("Write");
-    return;
-  }
-
-  // Read position 0
-  Serial.println("AFTER");
-  val = Eeprom.retrieve(POSITION);
-  if (Eeprom.isError())
-  {
-    errorHandler("Read");
-    return;
-  }
-  Serial.println(val);
-  Serial.println(val, HEX);
-  Serial.println(val, BIN);
-
+  Serial.println("END");
 }
 
 

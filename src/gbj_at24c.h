@@ -204,6 +204,34 @@ uint8_t erase();
 
 
 /*
+  Detect type of an EEPROM chip.
+
+  DESCRIPTION:
+  The method detects the type of the EEPROM chip by detecting its capacity.
+  - The method tests type from the highest supported capacity.
+  - The test is based on writing specific value to 0 position of the EEPROM
+    and another specific value to the first positon beyond the capacity of the
+    previous supported type. If the tested type is not correct, the EEPROM
+    rewrites the value in 0 position with tested value, which is diffeerent from
+    the reference value written directly to 0 position. The methods decreases
+    tested types until the 0 positon is not rewritten.
+  - The method really rewrites just 0 positon of EEPROM and the position in the
+    middle of detected type capacity, e.g., for AT24C256 chip it is position
+    16384.
+
+  PARAMETERS:
+  type - Referenced variable for placing detected EEPROM type.
+         - Data type: non-negative integer
+         - Default value: none
+         - Limited range: 0 ~ 255
+
+  RETURN:
+  Result code.
+*/
+uint8_t detectSize(uint8_t &type);
+
+
+/*
   Store a value to the EEPROM.
 
   DESCRIPTION:
@@ -239,13 +267,11 @@ uint8_t store(uint16_t position, T data)
 
   DESCRIPTION:
   The method reads a value of particular data type, generic or custom, from the
-  memory to an external buffer with itmes of desired data type.
+  memory to an referenced external variable.
   - The method is templated utilizing method retrieveStream(), so that it
     determines data byte stream length automatically.
   - The method does not need to be called by templating syntax, because it is able
-    to identify proper data type by data type of buffer pointer.
-  - An external buffer pointer is usually a pointer to a variable of corresponding
-    data type.
+    to identify proper data type from provided referenced variable.
 
   PARAMETERS:
   position - Memory position where the value retrieving should start.
@@ -253,17 +279,18 @@ uint8_t store(uint16_t position, T data)
              - Default value: none
              - Limited range: 0 ~ getCapacityByte() - 1
 
-  dataBuffer - Pointer to a data buffer for placing read data of desired type.
-               - Data type: dynamic
-               - Default value: none
-               - Limited range: address space
+  data - Pointer to a referenced variable for placing read data of desired type.
+         - Data type: dynamic
+         - Default value: none
+         - Limited range: address space
 
   RETURN:
   Result code.
 */
 template<class T>
-uint8_t retrieve(uint16_t position, T *dataBuffer)
+uint8_t retrieve(uint16_t position, T &data)
 {
+  T *dataBuffer = &data;
   return retrieveStream(position, (uint8_t *)dataBuffer, sizeof(T));
 }
 
@@ -278,10 +305,10 @@ inline void setPageSize(uint8_t pageSize) { _status.pageSize = pageSize; };
 // Public getters
 //------------------------------------------------------------------------------
 inline uint8_t getType() { return _status.capacityBit; };
-inline uint16_t getCapacityKiBit() { return 1 << _status.capacityBit; }; // In Kibits
-inline uint32_t getCapacityBit() { return (uint32_t) getCapacityKiBit() << 10; }; // In bits
-inline uint8_t getCapacityKiByte() { return getCapacityKiBit() >> 3; };  // In Kibibytes
-inline uint16_t getCapacityByte() { return getCapacityKiBit() << 7; };  // In bytes
+inline uint32_t getCapacityKiBit() { return 1 << _status.capacityBit; }; // In Kibits
+inline uint32_t getCapacityBit() { return getCapacityKiBit() << 10; }; // In bits
+inline uint32_t getCapacityKiByte() { return getCapacityKiBit() >> 3; };  // In Kibibytes
+inline uint32_t getCapacityByte() { return getCapacityKiBit() << 7; };  // In bytes
 inline uint8_t getPageSize() { return _status.pageSize; };  // In bytes
 inline uint16_t getPages() { return getCapacityByte() / getPageSize(); };
 

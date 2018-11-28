@@ -15,6 +15,7 @@ storeStream	KEYWORD2
 retrieveStream	KEYWORD2
 fill	KEYWORD2
 erase	KEYWORD2
+detect	KEYWORD2
 store	KEYWORD2
 retrieve	KEYWORD2
 setPageSize	KEYWORD2
