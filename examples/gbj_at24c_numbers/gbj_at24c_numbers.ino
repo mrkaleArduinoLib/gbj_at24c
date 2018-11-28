@@ -1,6 +1,6 @@
 /*
   NAME:
-  Storing to and retrieving from EEPROM numbers of various data types.
+  Storing to and retrieving numbers of various data types from EEPROM.
 
   DESCRIPTION:
   The sketch demonstrates templated methods of the library by storing values
