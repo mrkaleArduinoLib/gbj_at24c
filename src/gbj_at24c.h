@@ -87,23 +87,23 @@ gbj_at24c(uint32_t clockSpeed = CLOCK_100KHZ, bool busStop = true, \
             - If address is lower than minimal allowed one, it is defaulted
               to this minimal value.
             - Data type: non-negative integer
-            - Default value: 0
-            - Limited range: AT24C01 ~ ADDRESS_MAX or 0 ~ 7
+            - Default value: ADDRESS_MIN
+            - Limited range: ADDRESS_MIN ~ ADDRESS_MAX or 0 ~ 7
 
   RETURN:
   Result code.
 */
-uint8_t begin(uint8_t type, uint8_t address = 0);
+uint8_t begin(uint8_t type, uint8_t address = ADDRESS_MIN);
 
 
 /*
   Store byte stream to the EEPROM.
 
   DESCRIPTION:
-  The method writes input data byte stream to the memory chunked memory pages
+  The method writes input data byte stream to the memory chunked by memory pages
   if needed.
   - If length of the stored byte stream spans over memory pages, the method
-    executes more communication transactions, each for corresponding page.
+    executes more communication transactions, each for corresponding memory page.
 
   PARAMETERS:
   position - Memory position where the storing should start.
@@ -191,8 +191,7 @@ uint8_t fill(uint16_t position, uint16_t dataLen, uint8_t fillValue);
   DESCRIPTION:
   The method writes byte value 0xFF (all binary 1s) to whole memory.
   - The methods utilizes the method fill() from 0 position with entire byte
-    capacity of a memory chip with byte value 0xFF while it writes memory page
-    by page.
+    capacity of a memory chip while it writes memory page by page.
 
   PARAMETERS:
   None
@@ -210,12 +209,12 @@ uint8_t erase();
   The method detects the type of the EEPROM chip by detecting its capacity.
   - The method tests type from the highest supported capacity.
   - The test is based on writing specific value to 0 position of the EEPROM
-    and another specific value to the first positon beyond the capacity of the
+    and another specific value to the first position beyond the capacity of the
     previous supported type. If the tested type is not correct, the EEPROM
-    rewrites the value in 0 position with tested value, which is diffeerent from
+    rewrites the value in 0 position with tested value, which is different from
     the reference value written directly to 0 position. The methods decreases
-    tested types until the 0 positon is not rewritten.
-  - The method really rewrites just 0 positon of EEPROM and the position in the
+    tested types until the 0 position is not rewritten.
+  - The method really rewrites just 0 position of EEPROM and the position in the
     middle of detected type capacity, e.g., for AT24C256 chip it is position
     16384.
 
@@ -228,7 +227,7 @@ uint8_t erase();
   RETURN:
   Result code.
 */
-uint8_t detectSize(uint8_t &type);
+uint8_t detectType(uint8_t &type);
 
 
 /*
@@ -239,7 +238,8 @@ uint8_t detectSize(uint8_t &type);
   - The method is templated utilizing method storeStream(), so that it determines
     data byte stream length automatically.
   - The method does not need to be called by templating syntax, because it is able
-    to identify proper data type by data type of the stored data value parameter.
+    to identify proper data type by data type of the just storing data value
+    parameter.
 
   PARAMETERS:
   position - Memory position where the value storing should start.
@@ -298,7 +298,6 @@ uint8_t retrieve(uint16_t position, T &data)
 //------------------------------------------------------------------------------
 // Public setters - they usually return result code.
 //------------------------------------------------------------------------------
-inline void setPageSize(uint8_t pageSize) { _status.pageSize = pageSize; };
 
 
 //------------------------------------------------------------------------------
@@ -344,6 +343,7 @@ struct
 // Private methods - they return result code if not stated else
 //------------------------------------------------------------------------------
 uint8_t setAddress(uint8_t address);
+inline void setPageSize(uint8_t pageSize) { _status.pageSize = pageSize; };
 uint8_t checkPosition(uint16_t position, uint16_t dataLen);
 
 };

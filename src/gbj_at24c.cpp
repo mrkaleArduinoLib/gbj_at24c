@@ -113,7 +113,7 @@ uint8_t gbj_at24c::erase()
 }
 
 
-uint8_t gbj_at24c::detectSize(uint8_t &type)
+uint8_t gbj_at24c::detectType(uint8_t &type)
 {
   const uint16_t refPosition = 0;
   const uint8_t refValue = 0x55;

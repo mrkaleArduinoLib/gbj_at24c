@@ -1,32 +1,20 @@
 <a id="library"></a>
 # gbjAT24C
 Library for Atmel *AT24Cxxx* EEPROM chips communicating on two-wire (I2C) bus.
-- Sensor can have following addresses, which allows up to 4 sensors present on the same two-wire bus:
-  - `0x48` for ADD0 pin connected to GND (ground)
-  - `0x49` for ADD0 pin connected to V+ (power supply positive rail)
-  - `0x4A` for ADD0 pin connected to SDA (serial data rail of the two-wire bus)
-  - `0x4B` for ADD0 pin connected to SCL (serial clock rail of the two-wire bus)
-- The library provides measured temperature in degrees of Celsius.
-- For conversion among various temperature unit scales and for calculating dew point temperature use library *gbjAppHelpers*.
-- The sensor in normal mode has 12 bit resolution with sensitivity 0.0625 centigrade with measurement range -55 to +128 centigrade.
-- The extended mode has 13 bit resolution, but the same sensitivity and it just extends the upper temperature measurement range up to +150 centigrade.
-  - Switching (reconfiguration) to extended mode from normal mode or vice-versa needs a time delay cca 350 milliseconds after it in order to settle the sensor and stabilize the temperature conversion.
-  - Without the delay after switching to extended mode the reading is doubled to real temperature at first reading after switching mode.
-  - Without the delay after switching to normal mode the reading is halved to real temperature at first reading after switching mode.
-  - Library does not have implemented such specific delay after mode switching due to small usefulness of the extended mode.
+- Chip can have up to 8 addresses from `0x50` to `0x57` according to hardware configuration of its address pins.
 
 
 #### Particle hardware configuration
-- Connect microcontroller's pin `D0` to sensor's pin **SDA** (Serial Data).
-- Connect microcontroller's pin `D1` to sensor's pin **SCL** (Serial Clock).
+- Connect microcontroller's pin `D0` to EEPROM's pin **SDA** (Serial Data).
+- Connect microcontroller's pin `D1` to EEPROM's pin **SCL** (Serial Clock).
 
 #### Arduino UNO hardware configuration
-- Connect microcontroller's pin `A4` to sensor's pin **SDA** (Serial Data).
-- Connect microcontroller's pin `A5` to sensor's pin **SCL** (Serial Clock).
+- Connect microcontroller's pin `A4` to EEPROM's pin **SDA** (Serial Data).
+- Connect microcontroller's pin `A5` to EEPROM's pin **SCL** (Serial Clock).
 
 #### Espressif - ESP8266, ESP32 default hardware configuration
-- Connect microcontroller's pin `D2` to sensor's pin **SDA** (Serial Data).
-- Connect microcontroller's pin `D1` to sensor's pin **SCL** (Serial Clock).
+- Connect microcontroller's pin `D2` to EEPROM's pin **SDA** (Serial Data).
+- Connect microcontroller's pin `D1` to EEPROM's pin **SCL** (Serial Clock).
 
 
 <a id="dependency"></a>
@@ -42,121 +30,85 @@ Library for Atmel *AT24Cxxx* EEPROM chips communicating on two-wire (I2C) bus.
 - **TwoWire**: I2C system library loaded from the file *Wire.h*.
 
 #### Custom Libraries
-- **gbjTwoWire**: I2C custom library loaded from the file *gbj_twowire.h*. The library [gbjTMP102](#library) inherits common bus functionality from this library.
+- **gbjTwoWire**: I2C custom library loaded from the file *gbj_twowire.h*. The library [gbjat24c](#library) inherits common bus functionality from this library.
 
 
 <a id="constants"></a>
 ## Constants
-- **gbj\_tmp102::VERSION**: Name and semantic version of the library.
+- **gbj\_at24c::VERSION**: Name and semantic version of the library.
 
 
 <a id="addresses"></a>
 #### Addresses
-- **gbj\_tmp102::ADDRESS\_GND**: ADD0 pin connected to GND pin (default).
-- **gbj\_tmp102::ADDRESS\_VCC**: ADD0 pin connected to positive power supply rail.
-- **gbj\_tmp102::ADDRESS\_SDA**: ADD0 pin connected to serial data rail of two-wire bus.
-- **gbj\_tmp102::ADDRESS\_SCL**: ADD0 pin connected to serial clock rail of two-wire bus.
+- **gbj\_at24c::ADDRESS\_MIN**: Minimal address (all address pins `LOW`).
+- **gbj\_at24c::ADDRESS\_MAX**: Maximal address value (all address pins `HIGH`).
 
 
-<a id="conversions"></a>
-#### Conversion rates
-- **gbj\_tmp102::CONVERSION\_PERIOD\_4000MS**: Conversion period in milliseconds for conversion frequency 0.25 Hz.
-- **gbj\_tmp102::CONVERSION\_PERIOD\_1000MS**: Conversion period in milliseconds for conversion frequency 1 Hz.
-- **gbj\_tmp102::CONVERSION\_PERIOD\_250MS**: Conversion period in milliseconds for conversion frequency 4 Hz (default).
-- **gbj\_tmp102::CONVERSION\_PERIOD\_125MS**: Conversion period in milliseconds for conversion frequency 8 Hz.
-- **gbj\_tmp102::CONVERSION\_RATE\_025HZ**: Conversion frequency 0.25 Hz.
-- **gbj\_tmp102::CONVERSION\_RATE\_1HZ**: Conversion frequency 1 Hz.
-- **gbj\_tmp102::CONVERSION\_RATE\_4HZ**: Conversion frequency 4 Hz (default).
-- **gbj\_tmp102::CONVERSION\_RATE\_8HZ**: Conversion frequency 8 Hz.
+<a id="capacity"></a>
+#### Supported EEPROM types and capacities
+The last number in the type mark is the capacity of a chip in kibibit (1 Kib = 1024 bits). So that the usual byte capacity is 8 time lower and expressed in kibibytes (1 KiB = 1024 bytes).
 
+- **gbj\_at24c::AT24C01**: 1 Kib, 1024 bits, 128 bytes.
+- **gbj\_at24c::AT24C02**: 2 Kib, 2048 bits, 256 bytes.
+- **gbj\_at24c::AT24C04**: 4 Kib, 4096 bits, 512 bytes.
+- **gbj\_at24c::AT24C08**: 8 Kib, 8192 bits, 1024 bytes, 1 KiB.
+- **gbj\_at24c::AT24C16**: 16 Kib, 16384 bits, 2048 bytes, 2 KiB.
+- **gbj\_at24c::AT24C32**: 32 Kib, 32768 bits, 4096 bytes, 4 KiB.
+- **gbj\_at24c::AT24C64**: 64 Kib, 65536 bits, 8192 bytes, 8 KiB.
+- **gbj\_at24c::AT24C128**: 128 Kib, 131072 bits, 16384 bytes, 16 KiB.
+- **gbj\_at24c::AT24C256**: 256 Kib, 262144 bits, 32768 bytes, 32 KiB.
+- **gbj\_at24c::AT24C512**: 512 Kib, 524788 bits, 65536 bytes, 64 KiB.
 
-<a id="faults"></a>
-#### Fault queues
-- **gbj\_tmp102::FAULT\_QUEUE\_1**: 1 consecutive fault for changing ALERT pin state (default).
-- **gbj\_tmp102::FAULT\_QUEUE\_2**: 2 consecutive faults for changing ALERT pin state.
-- **gbj\_tmp102::FAULT\_QUEUE\_4**: 4 consecutive faults for changing ALERT pin state.
-- **gbj\_tmp102::FAULT\_QUEUE\_6**: 8 consecutive faults for changing ALERT pin state.
-
+ In fact, each of those class constant expresses an exponent of power of 2 determining the chip capacity in kibibits. For instance, the value of `gbj_at24c::AT24C64` constant is `6`, so that `2^^6 = 64 Kib`.
 
 <a id="errors"></a>
 #### Error codes
-- **gbj\_tmp102::ERROR\_RESET**: Resetting failure.
-- **gbj\_tmp102::ERROR\_MEASURE\_TEMP**: Measuring temperature failure.
-- **gbj\_tmp102::ERROR\_SETUP\_TEMP**: Temperature limits failure.
+- **gbj\_at24c::ERROR\_POSITION**: Memory position for storing or retrieving some byte is outside of an EEPROM chip capacity.
 
 Other error codes as well as result code are inherited from the parent library [gbjTwoWire](#dependency).
-
-
-<a id="configuration"></a>
-## Configuration
-The configuration of the sensor is realized by the configuration register, which consist of several configuration bits determining its behaviour. The library stores (caches) the value of the configuration register in its instance object.
-
-The sensor configuration implemented in the library is based on updating cached configuration value in advanced and finally to send that value to the sensor and write all configuration bits to configuration register at once in order to reduce communication on the two-wire bus in contrast to sending configuration bits to the sensor individually.
 
 
 <a id="interface"></a>
 ## Interface
 
 #### Main
-- [gbj_tmp102()](#gbj_tmp102)
+- [gbj_at24c()](#gbj_at24c)
 - [begin()](#begin)
-- [reset()](#reset)
-- [measureTemperature()](#measureTemperature)
-- [measureTemperatureOneshot()](#measureTemperatureOneshot)
-- [calculateTemperature()](#calculateTemperature)
-
-#### Setters
-- [setConfiguration()](#setConfiguration)
-- [setAlertLow()](#setAlertValue)
-- [setAlertHigh()](#setAlertValue)
-- [setAlerts()](#setAlertValue)
-- [configAlertActiveLow()](#configAlertMode)
-- [configAlertActiveHigh()](#configAlertMode)
-- [configExtendedMode()](#configResolutionMode)
-- [configNormalMode()](#configResolutionMode)
-- [configShutdownMode()](#configPowerMode)
-- [configContinuousMode()](#configPowerMode)
-- [configInterruptMode()](#configActionMode)
-- [configThermostatMode()](#configActionMode)
-- [configConversionRate()](#configConversionRate)
-- [configFaultQueue()](#configFaultQueue)
-- [configOneshotMode()](#configOneshotMode)
+- [storeStream()](#storeStream)
+- [retrieveStream()](#retrieveStream)
+- [store()](#store)
+- [retrieve()](#retrieve)
+- [fill()](#fill)
+- [erase()](#erase)
+- [detectType()](#detectType)
 
 #### Getters
-- [getConfiguration()](#getConfiguration)
-- [getAlertActiveLow()](#getAlertMode)
-- [getAlertActiveHigh()](#getAlertMode)
-- [getAlertLow()](#getAlertValue)
-- [getAlertHigh()](#getAlertValue)
-- [getAlert()](#getAlert)
-- [getExtendedMode()](#getResolutionMode)
-- [getNormalMode()](#getResolutionMode)
-- [getShutdownMode()](#getPowerMode)
-- [getContinuousMode()](#getPowerMode)
-- [getInterruptMode()](#getActionMode)
-- [getThermostatMode()](#getActionMode)
-- [getConversionRate()](#getConversionRate)
-- [getFaultQueue()](#getFaultQueue)
-- [getOneshotMode()](#getOneshotMode)
+- [getType()](#getType)
+- [getPageSize()](#getPageSize)
+- [getPages()](#getPages)
+- [getCapacityBit()](#getCapacityBit)
+- [getCapacityKiBit()](#getCapacityBit)
+- [getCapacityByte()](#getCapacityByte)
+- [getCapacityKiByte()](#getCapacityByte)
 
 Other possible setters and getters are inherited from the parent library [gbjTwoWire](#dependency) and described there.
 
 
-<a id="gbj_tmp102"></a>
-## gbj_tmp102()
+<a id="gbj_at24c"></a>
+## gbj_at24c()
 #### Description
 The library does not need special constructor and destructor, so that the inherited ones are good enough and there is no need to define them in the library, just use it with default or specific parameters as defined at constructor of parent library [gbjTwoWire](#dependency).
 - Constructor sets parameters specific to the two-wire bus in general.
 - All the constructor parameters can be changed dynamically with corresponding setters later in a sketch.
 
 #### Syntax
-    gbj_tmp102(uint32_t clockSpeed, bool busStop, uint8_t pinSDA, uint8_t pinSCL);
+    gbj_at24c(uint32_t clockSpeed, bool busStop, uint8_t pinSDA, uint8_t pinSCL);
 
 #### Parameters
 <a id="prm_busClock"></a>
 - **clockSpeed**: Two-wire bus clock frequency in Hertz. If the clock is not from enumeration, it fallbacks to 100 kHz.
-  - *Valid values*: gbj\_tmp102::CLOCK\_100KHZ, gbj\_tmp102::CLOCK\_400KHZ
-  - *Default value*: gbj\_tmp102::CLOCK\_100KHZ
+  - *Valid values*: gbj\_at24c::CLOCK\_100KHZ, gbj\_at24c::CLOCK\_400KHZ
+  - *Default value*: gbj\_at24c::CLOCK\_100KHZ
 
 
 <a id="prm_busStop"></a>
@@ -179,15 +131,15 @@ The library does not need special constructor and destructor, so that the inheri
   - *Default value*: 5 (GPIO5, D1)
 
 #### Returns
-Object performing the sensor management.
+Object performing the EEPROM management.
 The constructor cannot return [a result or error code](#constants) directly, however, it stores them in the instance object. The result can be tested in the operational code with the method [getLastResult()](#getLastResult), [isError()](#isError), or [isSuccess()](#isSuccess).
 
 #### Example
 The method has all arguments defaulted and calling without any parameters is equivalent to the calling with all arguments set by corresponding constant with default value:
 
 ```cpp
-  gbj_tmp102 Sensor = gbj_tmp102(); // It is equivalent to
-  gbj_tmp102 Sensor = gbj_tmp102(gbj_tmp102::CLOCK_100KHZ, true, D2, D1);
+  gbj_at24c Eeprom = gbj_at24c(); // It is equivalent to
+  gbj_at24c Eeprom = gbj_at24c(gbj_at24c::CLOCK_100KHZ, true, D2, D1);
 ```
 
 [Back to interface](#interface)
@@ -196,50 +148,199 @@ The method has all arguments defaulted and calling without any parameters is equ
 <a id="begin"></a>
 ## begin()
 #### Description
-The method takes, sanitizes, and stores sensor parameters to a class instance object and initiates two-wire bus.
-- The method sets parameters specific to the sensor itself.
-- The method resets the sensor to its power-up state (see details in method [reset](#reset)).
-- All the method parameters can be changed dynamically with corresponding [setters](#interface) later in a sketch.
+The method takes, sanitizes, and stores EEPROM parameters to a class instance object and initiates two-wire bus.
+- The method sets parameters specific to the EEPROM itself.
 
 #### Syntax
-    uint8_t begin(uint8_t address);
+    uint8_t begin(nt8_t type, uint8_t address);
 
 #### Parameters
+<a id="prm_type"></a>
+- **type**: One of 10 supported Atmel EEPROM chip types. The input value is limited to maximal supported capacity.
+  - *Valid values*: [gbj\_at24c::AT24C01 ~ gbj\_at24c::AT24C512](#capacity).
+  - *Default value*: None
+
+
 <a id="prm_address"></a>
-- **address**: One of four possible 7 bit addresses of the sensor.
-  - *Valid values*: [gbj\_tmp102::ADDRESS\_GND](#addresses), [gbj\_tmp102::ADDRESS\_VCC](#addresses), [gbj\_tmp102::ADDRESS\_SDA](#addresses), [gbj\_tmp102::ADDRESS\_SCL](#addresses).
-  - *Default value*: [gbj\_tmp102::ADDRESS\_GND](#addresses)
-    - The default values is set to address corresponding to grounded ADD0 pin.
-    - If input value is none of expected ones, the method fallbacks it to default address.
-    - Implementing addressing allows up to 4 sensors present on the same two-wire bus.
-    - Module boards with the sensor have usually ADD0 grounded and are equipped with soldering pad for reconnecting that pin to V+ rail.
+- **address**: One of 8 possible 7 bit addresses of the EEPROM chip or binary representation of the address pins configuration, i.e., increment to the basic (minimal) address.
+  - *Valid values*: [gbj\_at24c::ADDRESS\_MIN ~ gbj\_at24c::ADDRESS\_MAX](#addresses).
+  - *Default value*: [gbj\_at24c::ADDRESS\_MIN](#addresses)
+    - The default values is set to address corresponding to all address pins grounded.
+    - The input value is limited to maximal address.
+    - Implementing addressing allows up to 8 EEPROMs present on the same two-wire bus.
+
+#### Returns
+Some of [result or error codes](#constants).
+
+[Back to interface](#interface)
+
+
+<a id="storeStream"></a>
+## storeStream()
+#### Description
+The method writes input data byte stream to the memory chunked by memory pages if needed.
+- If length of the stored byte stream spans over memory pages, the method executes more communication transactions, each for corresponding memory page.
+
+#### Syntax
+    uint8_t storeStream(uint16_t position, uint8_t *dataBuffer, uint16_t dataLen);
+
+#### Parameters
+- **position**: Memory position where the storing should start. The input value is limited to maximal supported capacity in bytes counting from 0.
+  - *Valid values*: non-negative integer 0 ~ [getCapacityByte()](#getCapacityByte) - 1
+  - *Default value*: None
+
+
+- **dataBuffer**: Pointer to the byte data buffer.
+  - *Valid values*: address space
+  - *Default value*: None
+
+
+- **dataLen**: Number of bytes to be stored in memory.
+  - *Valid values*: non-negative integer 0 ~ 65535
+  - *Default value*: None
 
 #### Returns
 Some of [result or error codes](#constants).
 
 #### See also
-[reset()](#reset)
+[retrieveStream()](#retrieveStream)
 
 [Back to interface](#interface)
 
 
-<a id="reset"></a>
-## reset()
+<a id="retrieveStream"></a>
+## retrieveStream()
 #### Description
-The method resets the sensor by the general call software reset sending the code `0x06` to the two-wire bus at address `0x00` and reads the content of the configuration register to the library instance object. Software reset causes resetting all internal registers to their power-up values, which determine following configuration and values:
-- Upper alert temperature limit 80 centigrade.
-- Lower alert temperature limit 75 centigrade.
-- Normal mode (12 bit).
-- Conversion rate 4 Hz.
-- Continuous power mode (shutdown mode off).
-- Thermostat (comparator) mode.
-- Alert pin active low.
-- Alert active.
-- One fault for fault queue.
-- One-shot conversion off.
+The method reads data from memory and places it to the provided data buffer. The buffer should be defined outside the library (in a sketch) with sufficient length for desired data.
 
 #### Syntax
-    uint8_t reset();
+    uint8_t retrieveStream(uint16_t position, uint8_t *dataBuffer, uint16_t dataLen);
+
+#### Parameters
+- **position**: Memory position where the retrieving should start. The input value is limited to maximal supported capacity in bytes counting from 0.
+  - *Valid values*: non-negative integer 0 ~ [getCapacityByte()](#getCapacityByte) - 1
+  - *Default value*: None
+
+
+- **dataBuffer**: Pointer to the byte data buffer.
+  - *Valid values*: address space
+  - *Default value*: None
+
+
+- **dataLen**: Number of bytes to be retrieved from memory.
+  - *Valid values*: non-negative integer 0 ~ 65535
+  - *Default value*: None
+
+#### Returns
+Some of [result or error codes](#constants).
+
+#### See also
+[storeStream()](#storeStream)
+
+[Back to interface](#interface)
+
+
+<a id="store"></a>
+## store()
+#### Description
+The method writes a value of particular data type, generic or custom, to the memory.
+- The method is templated utilizing method [storeStream()](#storeStream), so that it determines data byte stream length automatically.
+- The method does not need to be called by templating syntax, because it is able to identify proper data type by data type of the just storing data value parameter.
+
+#### Syntax
+    template<class T>
+    uint8_t store(uint16_t position, T data);
+
+#### Parameters
+- **position**: Memory position where the storing should start. The input value is limited to maximal supported capacity in bytes counting from 0.
+  - *Valid values*: non-negative integer 0 ~ [getCapacityByte()](#getCapacityByte) - 1
+  - *Default value*: None
+
+
+- **data**: Value of particular data type that should be stored in the memory. If the value of particular data type needs more memory bytes than there are present from the starting position to the end of chip memory, the error is returned.
+  - *Valid values*: dynamic data type
+  - *Default value*: None
+
+#### Returns
+Some of [result or error codes](#constants).
+
+#### See also
+[retrieve()](#retrieve)
+
+[Back to interface](#interface)
+
+
+<a id="retrieve"></a>
+## retrieve()
+#### Description
+The method reads a value of particular data type, generic or custom, from the memory.
+- The method is templated utilizing method [retrieveStream()](#retrieveStream), so that it determines data byte stream length automatically.
+- The method does not need to be called by templating syntax, because it is able to identify proper data type by data type of the just storing data value parameter.
+
+#### Syntax
+    template<class T>
+    uint8_t retrieve(uint16_t position, T &data);
+
+#### Parameters
+- **position**: Memory position where the retrieving should start. The input value is limited to maximal supported capacity in bytes counting from 0.
+  - *Valid values*: non-negative integer 0 ~ [getCapacityByte()](#getCapacityByte) - 1
+  - *Default value*: None
+
+
+- **data**: Pointer to a referenced variable for placing read data of desired type. If the data type of the external variable needs more memory bytes than there are present from the starting position to the end of chip memory, the error is returned.
+  - *Valid values*: dynamic data type
+  - *Default value*: None
+
+#### Returns
+Some of [result or error codes](#constants).
+
+#### See also
+[store()](#store)
+
+[Back to interface](#interface)
+
+
+<a id="fill"></a>
+## fill()
+#### Description
+The method writes input byte to defined positions in the memory.
+
+#### Syntax
+    uint8_t fill(uint16_t position, uint16_t dataLen, uint8_t fillValue);
+
+#### Parameters
+- **position**: Memory position where the storing should start. The input value is limited to maximal supported capacity in bytes counting from 0.
+  - *Valid values*: non-negative integer 0 ~ [getCapacityByte()](#getCapacityByte) - 1
+  - *Default value*: None
+
+
+- **dataLen**: Number of bytes to be filled in memory. If there are provided more bytes to fill from the position to the end of chip capacity, exceeding memory position are ignored without generating an error.
+  - *Valid values*: non-negative integer 0 ~ 65535
+  - *Default value*: None
+
+
+- **fillValue**: Value used to filling memory.
+  - *Valid values*: non-negative integer 0 ~ 255
+  - *Default value*: None
+
+#### Returns
+Some of [result or error codes](#constants).
+
+#### See also
+[erase()](#erase)
+
+[Back to interface](#interface)
+
+
+<a id="erase"></a>
+## erase()
+#### Description
+The method writes byte value `0xFF` (all binary 1s) to entire memory.
+- The methods utilizes the method [fill()](#fill) from 0 position with entire byte capacity of a memory chip while it writes memory page by page.
+- For higher capacity chips the erasing can take a longer time due to paging by memory pages and two-wire buffer limited size.
+
+#### Syntax
+    uint8_t erase();
 
 #### Parameters
 None
@@ -248,519 +349,139 @@ None
 Some of [result or error codes](#constants).
 
 #### See also
+[fill()](#fill)
+
+[Back to interface](#interface)
+
+
+<a id="detectType"></a>
+## detectType()
+#### Description
+The method detects the type of the EEPROM chip by detecting its capacity.
+- The method tests type from the highest supported capacity.
+- The test is based on writing specific value to 0 position of the EEPROM
+  and another specific value to the first position beyond the capacity of the
+  previous supported type. If the tested type is not correct, the EEPROM
+  rewrites the value in 0 position with tested value, which is different from
+  the reference value written directly to 0 position. The methods decreases
+  tested types until the 0 position is not rewritten.
+- The method really rewrites just 0 position of EEPROM and the position in the
+  middle of detected type capacity, e.g., for AT24C256 chip it is position
+  16384.
+
+#### Syntax
+    uint8_t detectType(uint8_t &type);
+
+#### Parameters
+- **type**: Referenced variable for placing detected EEPROM type.
+  - *Valid values*: [gbj\_at24c::AT24C01 ~ gbj\_at24c::AT24C512](#capacity)
+  - *Default value*: None
+
+#### Returns
+Some of [result or error codes](#constants).
+
+[Back to interface](#interface)
+
+
+<a id="getType"></a>
+## getType()
+#### Description
+The method provides current type of the EEPROM chip set by the [begin()](#begin) method.
+
+#### Syntax
+    uint8_t getType();
+
+#### Parameters
+None
+
+#### Returns
+EEPROM type defined by one from class constants [gbj\_at24c::AT24C01 ~ gbj\_at24c::AT24C512](#capacity).
+
+#### See also
+[detectType()](#detectType)
+
 [begin()](#begin)
 
 [Back to interface](#interface)
 
 
-<a id="measureTemperature"></a>
-## measureTemperature()
+<a id="getPageSize"></a>
+## getPageSize()
 #### Description
-The method measures temperature.
-- After each temperature reading the method reads the configuration register with the method [getConfiguration()](#getConfiguration) as well and its content stores in the instance object. It is essential for reading alert status with the method [getAlert()](#getAlert).
+The method provides length of the memory page in bytes.
 
 #### Syntax
-    float measureTemperature();
+    uint8_t getPageSize();
 
 #### Parameters
 None
 
 #### Returns
-Temperature in centigrade or the error value [gbj\_tmp102::ERROR\_MEASURE\_TEMP](#errors) with corresponding error code in the library object.
+EEPROM memory page length in bytes.
 
 #### See also
-[measureTemperatureOneshot()](#measureTemperatureOneshot)
+[getPages()](#getPages)
 
 [Back to interface](#interface)
 
 
-<a id="measureTemperatureOneshot"></a>
-## measureTemperatureOneshot()
+<a id="getPages"></a>
+## getPages()
 #### Description
-The method configures shutdown mode and one-shot conversion of the sensor. It waits until conversion finishes and returns ambient temperature in centigrade.
-- The method is useful at very long periods (couple of minutes and hours) between measurements in order to save power consumption.
-- After each temperature reading the method reads the configuration register with the method [getConfiguration()](#getConfiguration) as well and its content stores in the instance object. It is essential for reading alert status with the method [getAlert()](#getAlert).
+The method provides a number of memory pages.
 
 #### Syntax
-    float measureTemperatureOneshot();
+    uint16_t getPages();
 
 #### Parameters
 None
 
 #### Returns
-Temperature in centigrade or the error value [gbj\_tmp102::ERROR\_MEASURE\_TEMP](#errors) with corresponding error code in the library object.
+Number of EEPROM memory pages.
 
 #### See also
-[measureTemperature()](#measureTemperature)
+[getPageSize()](#getPageSize)
 
 [Back to interface](#interface)
 
 
-<a id="calculateTemperature"></a>
-## calculateTemperature()
+<a id="getCapacityBit"></a>
+## getCapacityBit(), getCapacityKiBit()
 #### Description
-The particular method wraps a formula for calculating temperature in centigrades from 16-bit word from temperature register or vice-versa.
-- The methods are suitable for storing temperatures in EEPROM as binary word instead of as float number.
+The particular method provides an EEPROM chip capacity either in bits or in kibibits.
 
 #### Syntax
-    float calculateTemperature(int16_t wordMeasure);
-    int16_t calculateTemperature(float temperature);
+    uint32_t getCapacityBit();
+    uint32_t getCapacityKiBit();
 
 #### Parameters
-- **wordMeasure**: Temperature binary word of temperature register. If the least significant bit is set and there is extended mode bit set in configuration register, the value is considered in 13-bit resolution.
-  - *Valid values*: integer
-  - *Default value*: none
-
-- **temperature**: Temperature in centigrade.
-  - *Valid values*: -55.0 ~ 150.0
-  - *Default value*: none
+None
 
 #### Returns
-Temperature in centigrade or binary word representing temperature.
+EEPROM chip capacity in bits or kibibits.
 
 #### See also
-[setAlertLow(), setAlertHigh(), setAlerts()](#setAlertValue)
-
-[getAlertLow(), getAlertHigh()](#getAlertValue)
+[getCapacityByte(), getCapacityKiByte()](#getCapacityByte)
 
 [Back to interface](#interface)
 
 
-<a id="setConfiguration"></a>
-## setConfiguration()
+<a id="getCapacityByte"></a>
+## getCapacityByte(), getCapacityKiByte()
 #### Description
-The method writes the new content of the configuration register stored in the instance object (configuration cache) to the sensor. This content should has been prepared by methods of type `configXXX` right before.
+The particular method provides an EEPROM chip capacity either in bytes or in kibibytes.
 
 #### Syntax
-    uint8_t setConfiguration(bool flagWait);
-
-#### Parameters
-- **flagWait**: Flag about waiting after writing to the configuration register. The waiting delay is defined in the library internally. No delay is used in the method [measureTemperatureOneshot()](#measureTemperatureOneshot).
-  - *Valid values*: true, false
-  - *Default value*: true
-
-#### Returns
-Some of [result or error codes](#constants).
-
-#### See also
-[getConfiguration()](#getConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="getConfiguration"></a>
-## getConfiguration()
-#### Description
-The method reads configuration register and its value stores in the instance object, so that it caches it and enables it for corresponding getters.
-
-#### Syntax
-    uint8_t getConfiguration();
+    uint32_t getCapacityByte();
+    uint32_t getCapacityKiByte();
 
 #### Parameters
 None
 
 #### Returns
-Some of [result or error codes](#constants).
+EEPROM chip capacity in bytes or kibibytes.
 
 #### See also
-[setConfiguration()](#setConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="setAlertValue"></a>
-## setAlertLow(), setAlertHigh(), setAlerts()
-#### Description
-The particular method writes either lower or upper temperature limit, or both at once to the sensor.
-- If an illogical limit value in comparison to its counterpart is provided, the error [gbj\_tmp102::ERROR\_SETUP\_TEMP](#errors)  is raised, e.g., than lower limit is greater than upper limit.
-- If both limits are set at once, they are sorted ascending at first.
-
-#### Syntax
-    uint8_t setAlertLow(float temperatureLow);
-    uint8_t setAlertHigh(float temperatureHigh);
-    uint8_t setAlerts(float temperatureLow, float temperatureHigh);
-
-#### Parameters
-- **temperatureLow**, **temperatureHigh**: Particular temperature limit in centigrade.
-  - *Valid values*: -55.0 ~ 150.0
-  - *Default value*: none
-
-#### Returns
-Some of [result or error codes](#constants).
-
-#### See also
-[getAlertLow(), getAlertHigh()](#getAlertValue)
-
-[Back to interface](#interface)
-
-
-<a id="getAlertValue"></a>
-## getAlertLow(), getAlertHigh()
-#### Description
-The particular method reads upper or lower temperature limit from the sensor.
-
-#### Syntax
-    float getAlertLow();
-    float getAlertHigh();
-
-#### Parameters
-None
-
-#### Returns
-Lower or upper temperature limit or an [error code](#errors) cached in the library object.
-
-#### See also
-[setAlertLow(), setAlertHigh(), setAlerts()](#setAlertValue)
-
-[Back to interface](#interface)
-
-
-<a id="configAlertMode"></a>
-## configAlertActiveLow(), configAlertActiveHigh()
-#### Description
-The particular method updates alert activity bit state in the cached configuration value before its sending to the sensor by the method [setConfiguration()](#setConfiguration).
-
-#### Syntax
-    void configAlertActiveLow();
-    void configAlertActiveHigh();
-
-#### Parameters
-None
-
-#### Returns
-None
-
-#### See also
-[getAlertActiveLow(), getAlertActiveHigh()](#getAlertMode)
-
-[setConfiguration()](#setConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="getAlertMode"></a>
-## getAlertActiveLow(), getAlertActiveHigh()
-#### Description
-The particular method determines flag about alert activity mode from the cached configuration value.
-
-#### Syntax
-    bool getAlertActiveLow();
-    bool getAlertActiveHigh();
-
-#### Parameters
-None
-
-#### Returns
-Flag about set particular alert activity mode.
-
-#### See also
-[configAlertActiveLow(), configAlertActiveHigh()](#configAlertMode)
-
-[getConfiguration()](#getConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="getAlert"></a>
-## getAlert()
-#### Description
-The method provides flag about state of alert pin from cached configuration value.
-- It is suitable for detecting the alert by software without need of hardware sensing the ALERT pin of the sensor.
-
-#### Syntax
-    bool getAlert();
-
-#### Parameters
-None
-
-#### Returns
-Flag about ALERT pin state.
-
-#### See also
-[getConfiguration()](#getConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="configResolutionMode"></a>
-## configExtendedMode(), configNormalMode()
-#### Description
-The particular method turns on corresponding resolution mode in the cached configuration value before its sending to the sensor by the method [setConfiguration()](#setConfiguration).
-- At *normal* mode the resolution is the 12-bit resolution.
-- At *extended* mode the resolution is the 13-bit resolution.
-- Extended mode does not increase sensitivity, just extents the upper temperature measurement range from +128 to +150 centigrades. So that in normal working conditions it is not very useful.
-- After changing resolution mode and writing it to the sensor it is needed to wait cca 350 milliseconds in order to settle the sensor and provide conversion. Otherwise the first conversion after changing resolution to extended mode from normal one doubles the measured temperature and after changing to normal mode from extended one halves the temperature, which might confuse follow-up logic or controlling mechanizm.
-- The library does not have extra delay after resolution change implemented, so that it must be enforced in a sketch.
-
-#### Syntax
-    void configExtendedMode();
-    void configNormalMode();
-
-#### Parameters
-None
-
-#### Returns
-None
-
-#### See also
-[getExtendedMode(), getNormalMode()](#getResolutionMode)
-
-[setConfiguration()](#setConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="getResolutionMode"></a>
-## getExtendedMode(), getNormalMode()
-#### Description
-The particular method determines flag about resolution mode state from the cached configuration value.
-
-#### Syntax
-    bool getExtendedMode();
-    bool getNormalMode();
-
-#### Parameters
-None
-
-#### Returns
-Flag about set particular resolution mode.
-
-#### See also
-[configExtendedMode(), configNormalMode()](#configResolutionMode)
-
-[getConfiguration()](#getConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="configPowerMode"></a>
-## configShutdownMode(), configContinuousMode()
-#### Description
-The particular method turns on corresponding power mode in the cached configuration value before its sending to the sensor by the method [setConfiguration()](#setConfiguration).
-- At *shutdown* mode the sensor turns on all its system except the serial interface and reduces power consumption. This mode is utilized by the method [measurementTemperatureOneshot()](#measurementTemperatureOneshot) for one-shot temperature measurement.
-- At *continuous* mode the sensor performs continuous temperature conversion according to its [current conversion rate](#getConversionRate).
-
-#### Syntax
-    void configShutdownMode();
-    void configContinuousMode();
-
-#### Parameters
-None
-
-#### Returns
-None
-
-#### See also
-[getShutdownMode(), getContinuousMode()](#getPowerMode)
-
-[setConfiguration()](#setConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="getPowerMode"></a>
-## getShutdownMode(), getContinuousMode()
-#### Description
-The particular method determines flag about power mode state from the cached configuration value.
-
-#### Syntax
-    bool getShutdownMode();
-    bool getContinuousMode();
-
-#### Parameters
-None
-
-#### Returns
-Flag about set particular power mode.
-
-#### See also
-[configShutdownMode(), configContinuousMode()](#configPowerMode)
-
-[getConfiguration()](#getConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="configActionMode"></a>
-## configInterruptMode(), configThermostatMode()
-#### Description
-The particular method turns on corresponding action mode in the cached configuration value before its sending to the sensor by the method [setConfiguration()](#setConfiguration).
-- At *interruption* mode the sensor generates a short impulse on ALERT pin at reaching particular temperature limit with particular polarity according to the [alert activity mode](#configAlertActivityMode).
-- At *termostat* mode the sensor changes state of ALERT pin at reaching a temperature limit with particular polarity according to the [alert activity mode](#configAlertActivityMode) and keeps it until reaching another temperature limit.
-
-#### Syntax
-    void configInterruptMode();
-    void configThermostatMode();
-
-#### Parameters
-None
-
-#### Returns
-None
-
-#### See also
-[getInterruptMode(), getThermostatMode()](#getActionMode)
-
-[setConfiguration()](#setConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="getActionMode"></a>
-## getInterruptMode(), getThermostatMode()
-#### Description
-The particular method determines flag about action mode state from the cached configuration value.
-
-#### Syntax
-    bool getInterruptMode();
-    bool getThermostatMode();
-
-#### Parameters
-None
-
-#### Returns
-Flag about set particular action mode.
-
-#### See also
-[configInterruptMode(), configThermostatMode()](#configActionMode)
-
-[getConfiguration()](#getConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="configConversionRate"></a>
-## configConversionRate()
-#### Description
-The method sets conversion rate bits in the cached configuration value before its sending to the sensor by the method [setConfiguration()](#setConfiguration). The rate is determined with corresponding library class constant.
-
-#### Syntax
-    void configConversionRate(uint8_t conversionRate);
-
-#### Parameters
-- **conversionRate**: Value determining conversion rate. It fallbacks to least significant 2 bits.
-  - *Valid values*: [gbj\_tmp102::CONVERSION\_RATE\_025HZ](#conversions) ~ [gbj\_tmp102::CONVERSION\_RATE\_8HZ](#conversions) or [gbj\_tmp102::CONVERSION\_PERIOD\_4000MS](#conversions) ~ [gbj\_tmp102::CONVERSION\_PERIOD\_125MS](#conversions)
-  - *Default value*: none
-
-#### Returns
-None
-
-#### See also
-[getConversionRate()](#getConversionRate)
-
-[setConfiguration()](#setConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="getConversionRate"></a>
-## getConversionRate()
-#### Description
-The method provides current conversion rate in form of value of pair of conversion rate bits from the cached configuration value. That value can be compared to corresponding library class constants in order to determine conversion frequency or period.
-
-#### Syntax
-    uint8_t getConversionRate();
-
-#### Parameters
-None
-
-#### Returns
-One of constants from ranges [gbj\_tmp102::CONVERSION\_RATE\_025HZ](#conversions) ~ [gbj\_tmp102::CONVERSION\_RATE\_8HZ](#conversions) or [gbj\_tmp102::CONVERSION\_PERIOD\_4000MS](#conversions) ~ [gbj\_tmp102::CONVERSION\_PERIOD\_125MS](#conversions).
-
-#### See also
-[configConversionRate()](#configConversionRate)
-
-[getConfiguration()](#getConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="configFaultQueue"></a>
-## configFaultQueue()
-#### Description
-The method sets fault queue bits in the cached configuration value before its sending to the sensor by the method [setConfiguration()](#setConfiguration). The queue is determined with corresponding library class constant and states the number of consecutive faults for triggering ALERT pin change.
-
-#### Syntax
-    void configFaultQueue(uint8_t faults);
-
-#### Parameters
-- **faults**: Value determining consecutive faults for alerting. It fallbacks to least significant 2 bits.
-  - *Valid values*: [gbj\_tmp102::FAULT\_QUEUE\_1](#conversions) ~ [gbj\_tmp102::FAULT\_QUEUE\_6](#conversions)
-  - *Default value*: none
-
-#### Returns
-None
-
-#### See also
-[getFaultQueue()](#getFaultQueue)
-
-[setConfiguration()](#setConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="getFaultQueue"></a>
-## getFaultQueue()
-#### Description
-The method provides current consecutive faults in form of value of pair of fault queue bits from the cached configuration value. That value can be compared to corresponding library class constants in order to determine number of consecutive faults.
-
-#### Syntax
-    uint8_t getFaultQueue();
-
-#### Parameters
-None
-
-#### Returns
-One of constants from range [gbj\_tmp102::FAULT\_QUEUE\_1](#conversions) ~ [gbj\_tmp102::FAULT\_QUEUE\_6](#conversions).
-
-#### See also
-[configFaultQueue()](#configFaultQueue)
-
-[getConfiguration()](#getConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="configOneshotMode"></a>
-## configOneshotMode()
-#### Description
-The method turns on one-shot temperature measurement mode in the cached configuration value before its sending to the sensor by the method [setConfiguration()](#setConfiguration).
-- This mode is utilized by the method [measurementTemperatureOneshot()](#measurementTemperatureOneshot) for one-shot temperature measurement.
-
-#### Syntax
-    void configOneshotMode();
-
-#### Parameters
-None
-
-#### Returns
-None
-
-#### See also
-[getOneshotMode()](#getOneshotMode)
-
-[setConfiguration()](#setConfiguration)
-
-[Back to interface](#interface)
-
-
-<a id="getOneshotMode"></a>
-## getOneshotMode()
-#### Description
-The method provides current consecutive faults in form of value of pair of fault queue bits from the cached configuration value. That value can be compared to corresponding library class constants in order to determine number of consecutive faults.
-
-#### Syntax
-    bool getOneshotMode();
-
-#### Parameters
-None
-
-#### Returns
-Flag about set one-shot measurement mode.
-
-#### See also
-[configOneshotMode()](#configOneshotMode)
-
-[getConfiguration()](#getConfiguration)
+[getCapacityBit(), getCapacityKiBit()](#getCapacityBit)
 
 [Back to interface](#interface)

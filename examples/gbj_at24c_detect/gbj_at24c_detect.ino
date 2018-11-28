@@ -99,22 +99,21 @@ void setup()
 
   // Initialize EEPROM for the highest supported capacity in order to setup
   // sufficient send delay.
-  // Adjust the type and address to your chip and address configuration.
-  if (Eeprom.begin(gbj_at24c::AT24C256))
-  if (Eeprom.begin(gbj_at24c::AT24C512)) // Use default address
+  // Adjust the address to your address configuration.
+  if (Eeprom.begin(gbj_at24c::AT24C512))
   {
     errorHandler("Begin dummy");
     return;
   }
   // Detect EEPROM type
-  if (Eeprom.detectSize(eepromType))
+  if (Eeprom.detectType(eepromType))
   {
     errorHandler("Detect");
     return;
   }
-  // Initialize detected EEPROM for default address.
+  // Initialize detected EEPROM.
   // Adjust the address to your address configuration.
-  if (Eeprom.begin(eepromType)) // Use default address
+  if (Eeprom.begin(eepromType))
   {
     errorHandler("Begin");
     return;
