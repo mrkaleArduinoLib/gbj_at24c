@@ -119,12 +119,13 @@ void setup()
     return;
   }
   // Dislay EEPROM parameters
-  Serial.println("Address = 0x" + String(Eeprom.getAddress(), HEX));
-  Serial.println("Type = AT24C" + String(Eeprom.getCapacityKiBit()));
-  Serial.println("Capacity = " + String(Eeprom.getCapacityKiBit()) + " Kib (" + String(Eeprom.getCapacityBit()) + " b)");
-  Serial.println("Capacity = " + String(Eeprom.getCapacityKiByte()) + " KiB (" + String(Eeprom.getCapacityByte()) + " B)");
-  Serial.println("Page = " + String(Eeprom.getPageSize()) + " B");
-  Serial.println("Pages = " + String(Eeprom.getPages()));
+  Serial.println("Clock: " + String(Eeprom.getBusClock() / 1000) + " kHz");
+  Serial.println("Address: 0x" + String(Eeprom.getAddress(), HEX));
+  Serial.println("Type: AT24C" + String(Eeprom.getCapacityKiBit()));
+  Serial.println("Capacity: " + String(Eeprom.getCapacityKiBit()) + " Kib (" + String(Eeprom.getCapacityBit()) + " b)");
+  Serial.println("Capacity: " + String(Eeprom.getCapacityKiByte()) + " KiB (" + String(Eeprom.getCapacityByte()) + " B)");
+  Serial.println("Page: " + String(Eeprom.getPageSize()) + " B");
+  Serial.println("Pages: " + String(Eeprom.getPages()));
   Serial.println("---");
   Serial.println("END");
 }

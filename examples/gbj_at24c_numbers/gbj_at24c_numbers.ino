@@ -114,7 +114,7 @@ void setup()
   }
 
   // Write and read byte
-  Serial.println("Stored byte = 0x" + String(valueByte, HEX));
+  Serial.println("Stored byte: 0x" + String(valueByte, HEX));
   if (Eeprom.store(POSITION, valueByte))
   {
     errorHandler("Store byte");
@@ -126,11 +126,11 @@ void setup()
     errorHandler("Retrieved byte");
     return;
   }
-  Serial.println("Retrieved byte = 0x" + String(valueByte, HEX));
+  Serial.println("Retrieved byte: 0x" + String(valueByte, HEX));
   Serial.println("---");
 
   // Write and read integer
-  Serial.println("Stored integer = 0x" + String(valueInt, HEX));
+  Serial.println("Stored integer: 0x" + String(valueInt, HEX));
   if (Eeprom.store(POSITION, valueInt))
   {
     errorHandler("Store integer");
@@ -142,11 +142,11 @@ void setup()
     errorHandler("Retrieved integer");
     return;
   }
-  Serial.println("Retrieved integer = 0x" + String(valueInt, HEX));
+  Serial.println("Retrieved integer: 0x" + String(valueInt, HEX));
   Serial.println("---");
 
   // Write and read float
-  Serial.println("Stored float = " + String(valueFloat));
+  Serial.println("Stored float: " + String(valueFloat));
   if (Eeprom.store(POSITION, valueFloat))
   {
     errorHandler("Store float");
@@ -158,7 +158,7 @@ void setup()
     errorHandler("Retrieved float");
     return;
   }
-  Serial.println("Retrieved float = " + String(valueFloat));
+  Serial.println("Retrieved float: " + String(valueFloat));
   Serial.println("---");
   Serial.println("END");
 }
