@@ -1,6 +1,6 @@
 /*
   NAME:
-  Capacity parameters of an EEPROM.
+  Fundamental parameters of EEPROM chip using gbjAT24C library.
 
   DESCRIPTION:
   The sketch displays all capacity parameters of the EEPROM.
@@ -14,7 +14,7 @@
   CREDENTIALS:
   Author: Libor Gabaj
 */
-#define SKETCH "GBJ_AT24C_CAPACITY 1.0.0"
+#define SKETCH "GBJ_AT24C_IDENTIFY 1.0.0"
 
 #include "gbj_at24c.h"
 
