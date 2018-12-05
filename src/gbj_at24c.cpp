@@ -4,6 +4,7 @@ const String gbj_at24c::VERSION = "GBJ_AT24C 1.0.0";
 
 uint8_t gbj_at24c::begin(uint8_t type, uint8_t address)
 {
+  if (gbj_twowire::begin()) return getLastResult();
   _status.capacityBit = constrain(type, AT24C01, AT24C512);
   // Send delay
   switch (_status.capacityBit)
