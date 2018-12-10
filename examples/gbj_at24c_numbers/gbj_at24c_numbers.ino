@@ -26,7 +26,7 @@ const unsigned int POSITION = 0;
 
 // Software configuration
 gbj_at24c Eeprom = gbj_at24c();
-// gbj_at24c Eeprom = gbj_at24c(gbj_at24c::CLOCK_100KHZ, true, D2, D1);
+// gbj_at24c Eeprom = gbj_at24c(gbj_at24c::CLOCK_100KHZ, D2, D1);
 // gbj_at24c Eeprom = gbj_at24c(gbj_at24c::CLOCK_400KHZ);
 byte valueByte = 0xAA;
 int valueInt = 0x5555;

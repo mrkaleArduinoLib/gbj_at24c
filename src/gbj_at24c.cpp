@@ -82,7 +82,9 @@ uint8_t gbj_at24c::storeStream(uint16_t position, uint8_t *dataBuffer, uint16_t 
 uint8_t gbj_at24c::retrieveStream(uint16_t position, uint8_t *dataBuffer, uint16_t dataLen)
 {
   if (checkPosition(position, dataLen)) return getLastResult();
+  setBusRpte();
   if (busSendStream((uint8_t*)&position, sizeof(position), true)) return getLastResult();
+  setBusStop();
   if (busReceive((uint8_t *)dataBuffer, dataLen)) return getLastResult();
   return getLastResult();
 }
@@ -159,8 +161,3 @@ uint8_t gbj_at24c::setAddress(uint8_t address)
   address = constrain(address, ADDRESS_MIN, ADDRESS_MAX);
   return gbj_twowire::setAddress(address);
 }
-
-
-//------------------------------------------------------------------------------
-// Getters
-//------------------------------------------------------------------------------

@@ -58,9 +58,8 @@ enum ErrorCodes
 /*
   Constructor taken from parent class.
 */
-gbj_at24c(uint32_t clockSpeed = CLOCK_100KHZ, bool busStop = true, \
-  uint8_t pinSDA = 4, uint8_t pinSCL = 5) \
-: gbj_twowire(clockSpeed, busStop, pinSDA, pinSCL) {};
+gbj_at24c(uint32_t clockSpeed = CLOCK_100KHZ, uint8_t pinSDA = 4, uint8_t pinSCL = 5) \
+: gbj_twowire(clockSpeed, pinSDA, pinSCL) {};
 
 
 /*
