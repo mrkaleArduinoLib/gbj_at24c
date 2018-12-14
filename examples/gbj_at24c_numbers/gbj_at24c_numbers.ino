@@ -29,7 +29,7 @@ gbj_at24c Eeprom = gbj_at24c();
 // gbj_at24c Eeprom = gbj_at24c(gbj_at24c::CLOCK_100KHZ, D2, D1);
 // gbj_at24c Eeprom = gbj_at24c(gbj_at24c::CLOCK_400KHZ);
 byte valueByte = 0xAA;
-int valueInt = 0x5555;
+int valueInt = 0xAA55;
 float valueFloat = 123.45;
 
 
@@ -58,7 +58,7 @@ void errorHandler(String location)
       break;
 
     case gbj_at24c::ERROR_NACK_DATA:
-      Serial.println("ERROR_PINS");
+      Serial.println("ERROR_NACK_DATA");
       break;
 
     case gbj_at24c::ERROR_NACK_OTHER:
@@ -159,6 +159,16 @@ void setup()
     return;
   }
   Serial.println("Retrieved float: " + String(valueFloat));
+  Serial.println("---");
+
+  // Read recent position
+  valueByte = 0xFF;
+  if (Eeprom.retrieveCurrent(valueByte))
+  {
+    errorHandler("Retrieved current");
+    return;
+  }
+  Serial.println("Retrieved current: 0x" + String(valueByte, HEX));
   Serial.println("---");
   Serial.println("END");
 }

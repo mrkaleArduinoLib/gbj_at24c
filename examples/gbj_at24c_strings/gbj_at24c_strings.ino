@@ -58,7 +58,7 @@ void errorHandler(String location)
       break;
 
     case gbj_at24c::ERROR_NACK_DATA:
-      Serial.println("ERROR_PINS");
+      Serial.println("ERROR_NACK_DATA");
       break;
 
     case gbj_at24c::ERROR_NACK_OTHER:

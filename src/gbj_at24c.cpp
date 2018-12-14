@@ -146,6 +146,14 @@ uint8_t gbj_at24c::detectType(uint8_t &type)
 }
 
 
+uint8_t gbj_at24c::retrieveCurrent(uint8_t &data)
+{
+  uint8_t *dataBuffer = &data;
+  if (busReceive((uint8_t *)dataBuffer, 1)) return getLastResult();
+  return getLastResult();
+}
+
+
 //-------------------------------------------------------------------------
 // Setters
 //-------------------------------------------------------------------------

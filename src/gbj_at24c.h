@@ -294,6 +294,25 @@ uint8_t retrieve(uint16_t position, T &data)
 }
 
 
+/*
+  Read current position
+
+  DESCRIPTION:
+  The method reads recently accessed position incremented by 1 in the mode
+  "current address read".
+
+  PARAMETERS:
+  data - Referenced variable for placing read data byte.
+         - Data type: non-negative integer
+         - Default value: none
+         - Limited range: 0 ~ 255
+
+  RETURN:
+  Result code.
+*/
+uint8_t retrieveCurrent(uint8_t &data);
+
+
 //------------------------------------------------------------------------------
 // Public setters - they usually return result code.
 //------------------------------------------------------------------------------

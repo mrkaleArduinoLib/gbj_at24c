@@ -76,6 +76,7 @@ Other error codes as well as result code are inherited from the parent library [
 - [begin()](#begin)
 - [storeStream()](#storeStream)
 - [retrieveStream()](#retrieveStream)
+- [retrieveCurrent()](#retrieveCurrent)
 - [store()](#store)
 - [retrieve()](#retrieve)
 - [fill()](#fill)
@@ -236,6 +237,25 @@ Some of [result or error codes](#constants).
 
 #### See also
 [storeStream()](#storeStream)
+
+[Back to interface](#interface)
+
+
+<a id="retrieveCurrent"></a>
+## retrieveCurrent()
+#### Description
+The method reads recently accessed position incremented by 1 in the mode "current address read".
+
+#### Syntax
+    uint8_t retrieveCurrent(uint8_t &data);
+
+#### Parameters
+- **data**: Pointer to a referenced variable for placing read data byte.
+  - *Valid values*: address space
+  - *Default value*: None
+
+#### Returns
+Some of [result or error codes](#constants).
 
 [Back to interface](#interface)
 
