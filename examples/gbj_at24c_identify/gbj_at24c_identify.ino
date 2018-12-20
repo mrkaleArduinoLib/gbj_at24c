@@ -93,12 +93,13 @@ void setup()
   Serial.println(SKETCH);
   Serial.println("Libraries:");
   Serial.println(gbj_twowire::VERSION);
+  Serial.println(gbj_memory::VERSION);
   Serial.println(gbj_at24c::VERSION);
   Serial.println("---");
 
   // Initialize EEPROM for default address.
   // Adjust the type and address to your chip and address configuration.
-  if (Eeprom.begin(gbj_at24c::AT24C256))
+  if (Eeprom.begin(gbj_at24c::AT24C512))
   {
     errorHandler("Begin");
     return;

@@ -102,12 +102,13 @@ void setup()
   Serial.println(SKETCH);
   Serial.println("Libraries:");
   Serial.println(gbj_twowire::VERSION);
+  Serial.println(gbj_memory::VERSION);
   Serial.println(gbj_at24c::VERSION);
   Serial.println("---");
 
   // Initialize EEPROM for default address.
   // Adjust the type and address to your chip and address configuration.
-  if (Eeprom.begin(gbj_at24c::AT24C256))
+  if (Eeprom.begin(gbj_at24c::AT24C32))
   {
     errorHandler("Begin");
     return;
@@ -144,10 +145,10 @@ void setup()
 
   // Write and read text as String object (by converting it to the byte stream)
   String textString = "987654321098765";
-  byte textLen = textString.length();
+  byte textLen = textString.length() + 1;  // Including trailing '\0'
   Serial.println("Stored string = " + textString);
   char textBuffer[textLen];
-  textString.toCharArray(textBuffer, textString.length());
+  textString.toCharArray(textBuffer, textLen);
   if (Eeprom.storeStream(POSITION, (uint8_t *)textBuffer, textLen))
   {
     errorHandler("Store String");

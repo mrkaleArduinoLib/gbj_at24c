@@ -102,6 +102,7 @@ void setup()
   Serial.println(SKETCH);
   Serial.println("Libraries:");
   Serial.println(gbj_twowire::VERSION);
+  Serial.println(gbj_memory::VERSION);
   Serial.println(gbj_at24c::VERSION);
   Serial.println("---");
 

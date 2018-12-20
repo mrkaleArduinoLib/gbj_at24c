@@ -94,6 +94,7 @@ void setup()
   Serial.println(SKETCH);
   Serial.println("Libraries:");
   Serial.println(gbj_twowire::VERSION);
+  Serial.println(gbj_memory::VERSION);
   Serial.println(gbj_at24c::VERSION);
   Serial.println("---");
 
@@ -121,7 +122,7 @@ void setup()
   // Dislay EEPROM parameters
   Serial.println("Clock: " + String(Eeprom.getBusClock() / 1000) + " kHz");
   Serial.println("Address: 0x" + String(Eeprom.getAddress(), HEX));
-  Serial.println("Type: AT24C" + String(Eeprom.getCapacityKiBit()));
+  Serial.println("Detected type: AT24C" + String(Eeprom.getCapacityKiBit()));
   Serial.println("Capacity: " + String(Eeprom.getCapacityKiBit()) + " Kib (" + String(Eeprom.getCapacityBit()) + " b)");
   Serial.println("Capacity: " + String(Eeprom.getCapacityKiByte()) + " KiB (" + String(Eeprom.getCapacityByte()) + " B)");
   Serial.println("Page: " + String(Eeprom.getPageSize()) + " B");
