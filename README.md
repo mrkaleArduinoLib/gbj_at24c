@@ -26,7 +26,7 @@ Library for Atmel `AT24Cxxx` EEPROM chips communicating on two-wire (also known 
 #### Arduino platform
 * **Arduino.h**: Main include file for the Arduino SDK version greater or equal to 100.
 * **inttypes.h**: Integer type conversions. This header file includes the exact-width integer definitions and extends them with additional facilities provided by the implementation.
-* **TwoWire**: I2C system library loaded from the file *Wire.h*.
+* **TwoWire**: I2C system library loaded from the file `Wire.h`.
 
 #### Custom Libraries
 * **gbjMemory**: Memory custom library loaded from the file `gbj_memory.h`, which provides common memory processing functionality.
@@ -95,7 +95,7 @@ Other possible setters and getters are inherited from the predecessor libraries 
 ## gbj_at24c()
 
 #### Description
-The library does not need special constructor and destructor, so that the inherited ones are good enough and there is no need to define them in the library, just use it with default or specific parameters as defined at constructor of parent library [gbjTwoWire](#dependency).
+The library does not need special constructor and destructor, so that the inherited ones are good enough and there is no need to define them in the library, just use it with default or specific parameters as defined at constructor of parent library.
 * Constructor sets parameters specific to the two-wire bus in general.
 * All the constructor parameters can be changed dynamically with corresponding setters later in a sketch.
 

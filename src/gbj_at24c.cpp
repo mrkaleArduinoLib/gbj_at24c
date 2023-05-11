@@ -55,6 +55,7 @@ gbj_at24c::ResultCodes gbj_at24c::begin(Capacities type, Addresses address)
   {
     return getLastResult();
   }
+  setPositionInWords();
   return setAddress(static_cast<uint8_t>(address));
 }
 
