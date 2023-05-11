@@ -6,7 +6,15 @@
     "type": "git",
     "url": "https://github.com/mrkaleArduinoLib/gbj_at24c.git"
   },
-  "version": "1.0.0",
+  "version": "1.1.0",
   "frameworks": "arduino",
-  "platforms": ["atmelavr", "atmelsam", "espressif8266", "espressif32"]
+  "platforms": [
+    "atmelavr",
+    "atmelsam",
+    "espressif8266",
+    "espressif32"
+  ],
+  "dependencies": {
+    "mrkaleArduinoLib/gbj_memory": ">=1.1.0"
+  }
 }
