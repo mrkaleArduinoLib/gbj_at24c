@@ -104,8 +104,8 @@ The library does not need special constructor and destructor, so that the inheri
 
 #### Parameters
 * **clockSpeed**: Two-wire bus clock frequency in Hertz.
-  * *Valid values*: ClockSpeed::CLOCK\_100KHZ, ClockSpeed::CLOCK\_400KHZ
-  * *Default value*: ClockSpeed::CLOCK\_100KHZ
+  * *Valid values*: ClockSpeeds::CLOCK\_100KHZ, ClockSpeeds::CLOCK\_400KHZ
+  * *Default value*: ClockSpeeds::CLOCK\_100KHZ
 
 * **pinSDA**: Microcontroller's pin for serial data. It is not a board pin but GPIO number. For hardware two-wire bus platforms it is irrelevant and none of methods utilizes this parameter for such as platforms for communication on the bus. On the other hand, for those platforms the parameters might be utilized for storing some specific attribute in the class instance object.
   * *Valid values*: positive integer

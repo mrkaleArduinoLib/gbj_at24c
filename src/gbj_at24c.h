@@ -55,7 +55,7 @@ public:
     AT24CXXX = 0xFF,
   };
 
-  gbj_at24c(ClockSpeed clockSpeed = CLOCK_100KHZ,
+  gbj_at24c(ClockSpeeds clockSpeed = CLOCK_100KHZ,
             uint8_t pinSDA = 4,
             uint8_t pinSCL = 5)
     : gbj_memory(clockSpeed, pinSDA, pinSCL){};
