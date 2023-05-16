@@ -36,7 +36,7 @@ Library for Atmel `AT24Cxxx` EEPROM chips communicating on two-wire (also known 
 <a id="constants"></a>
 
 ## Constants
-The library does not have specific constants. Error codes as well as result code are inherited from the parent libraries only.
+The library does not have specific error codes. Error codes as well as result code are inherited from the parent library only. The result code and error codes can be tested in the operational code with its method `getLastResult()`, `isError()` or `isSuccess()`.
 
 
 <a id="addresses"></a>
