@@ -1,6 +1,6 @@
 # gbjAT24C
 
-Library for Atmel `AT24Cxxx` EEPROM chips communicating on two-wire (also known as <abbr title='Inter-Integrated Circuit'>I2C</abbr>) bus.
+Library for Atmel `AT24Cxxx` with <abbr title='Electrically Rrasable Programmable Read-Only Memory'>EEPROM</abbr> chips communicating on two-wire (also known as <abbr title='Inter-Integrated Circuit'>I2C</abbr>) bus.
 * Chip can have up to 8 addresses from `0x50` to `0x57` according to hardware configuration of its address pins.
 
 
