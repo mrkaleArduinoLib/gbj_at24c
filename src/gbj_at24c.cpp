@@ -2,9 +2,9 @@
 
 gbj_at24c::ResultCodes gbj_at24c::begin(Capacities type, Addresses address)
 {
-  _status.capacityBit = type;
+  status_.capacityBit = type;
   // Send delay
-  switch (_status.capacityBit)
+  switch (status_.capacityBit)
   {
     case Capacities::AT24C01:
     case Capacities::AT24C02:
@@ -25,7 +25,7 @@ gbj_at24c::ResultCodes gbj_at24c::begin(Capacities type, Addresses address)
   }
   // Page size
   uint8_t pageSize;
-  switch (_status.capacityBit)
+  switch (status_.capacityBit)
   {
     case Capacities::AT24C01:
     case Capacities::AT24C02:
@@ -51,7 +51,7 @@ gbj_at24c::ResultCodes gbj_at24c::begin(Capacities type, Addresses address)
       break;
   }
   if (isError(
-        gbj_memory::begin((1 << (_status.capacityBit + 7)) - 1, pageSize)))
+        gbj_memory::begin((1 << (status_.capacityBit + 7)) - 1, pageSize)))
   {
     return getLastResult();
   }

@@ -118,7 +118,7 @@ public:
   ResultCodes detectType(Capacities &type);
 
   // Getters
-  inline Capacities getType() { return _status.capacityBit; }
+  inline Capacities getType() { return status_.capacityBit; }
 
 private:
   // Delays of writing to the memory
@@ -139,7 +139,7 @@ private:
   struct Status
   {
     Capacities capacityBit = Capacities::AT24CXXX; // Memory type
-  } _status;
+  } status_;
 };
 
 #endif
